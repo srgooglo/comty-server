@@ -1,0 +1,4 @@
+{
+    "globalPort": "7000",
+    "addressBind": "localhost" 
+}
