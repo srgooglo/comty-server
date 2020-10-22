@@ -1,4 +1,4 @@
-const { verbosity } = require('@ragestudio/nodecore-utils')
+const { verbosity, __legacy__objectToArray } = require('@ragestudio/nodecore-utils')
 
 const fs = require('fs')
 const koa = require('koa')
@@ -19,7 +19,9 @@ let env = {
 	addressBind: "localhost"
 }
 
-const authSocket = module.exports.auth = io.of('/auth');
+let sockets = [
+
+]
 
 
 if (core_env) {
@@ -48,16 +50,16 @@ function __init() {
 
 		socket.emit("updateState", { registeredNamespaces: namespaces })
 
-
 		socket.on('disconnect', (socket:any) => {
 			verbosity(`disconected from id => ${socket.id}`, { color: { 0: "magenta" } })
 		})
 
-		socket.on('pingPong', (e:any) => {
-			verbosity(e)
+		socket.on('floodTest', (e:any) => {
 			const n = e + 1
-			setTimeout(() => { socket.emit("pingPong", n) }, n)
+			verbosity([`floodTest (recived)=> ${e} | sending => ${n}`])
+			setTimeout(() => { socket.emit("floodTest", n) }, n)
 		})
+
 	})
 
 
@@ -65,8 +67,17 @@ function __init() {
 }
 
 function __namespaces() {
-	authSocket.on('connection', require('./sockets/auth')) //set auth
-
+	let activatedSockets = []
+	__legacy__objectToArray(namespaces).forEach(e => {
+		try {
+			sockets[e.key] = module.exports.auth = io.of(e.value)
+			sockets[e.key].on('connection', require(`./sockets/${e.key}`)) //set auth
+			activatedSockets.push(e.key)
+		} catch (error) {
+			verbosity([`Error activating [${e.key}] > ${error}`])
+		}
+	})
+	verbosity([`MODULES AVAILABLE >`, activatedSockets], { color: { 0: "inverse" }, secondColor: { 0: "green" } })
 }
 
 
