@@ -6,11 +6,23 @@ const http = require('http')
 const socketioAuth = require('socketio-auth')
 const namespaces = require('./namespaces')
 
-let node = new koa()
-const server = http.createServer(node.callback())
+const BodyParser = require("koa-bodyparser");
+const Router = require("koa-router");
+const Logger = require("koa-logger");
+const serve = require("koa-static");
+const mount = require("koa-mount");
+const cors = require('koa-cors');
+const HttpStatus = require("http-status");
+
+let nodes = {
+	global: new koa()
+}
+
+
+const server = http.createServer(nodes.global.callback())
 const io = require('socket.io')(server)
 
-let core_env = fs.readFileSync("./core_env.json", (err:any) => {
+let rc = fs.readFileSync("./.rcserver.json", (err:any) => {
 	console.log(err)
 })
 
@@ -23,11 +35,14 @@ let sockets = [
 
 ]
 
+let sessionHeaders = [
 
-if (core_env) {
+]
+
+if (rc) {
 	try {
-		core_env = JSON.parse(core_env)
-		env = { ...core_env, ...env }
+		rc = JSON.parse(rc)
+		env = { ...rc, ...env }
 	} catch (error) {
 		console.error(error)
 	}
@@ -37,18 +52,28 @@ if (core_env) {
 
 function setSessionHeader(payload:any) {
 	const timeNow = new Date().getTime()
-	console.log(payload.id)
+	sessionHeaders[payload.id] = { time: timeNow }
 }
 
-function __init() {
+function _createServer() {
 	server.listen(env.globalPort)
 	verbosity(`Server listening with port => ${env.globalPort}`)
 
 	io.on('connection', (socket:any) => {
+		const { versions, platform, pid, uptime } = process
 		setSessionHeader(socket)
-		verbosity(`new connection from id => ${socket.id}`, { color: { 0: "green" } })
-
-		socket.emit("updateState", { registeredNamespaces: namespaces })
+		verbosity(`new connection | id => ${socket.id}`, { color: { 0: "green" } })
+		socket.emit("updateState", {
+			serverProcess: {
+				versions,
+				platform,
+				pid,
+				uptime 
+			},
+			sessionHeader: sessionHeaders[socket.id], 
+			registeredNamespaces: namespaces,
+			_rc: rc
+		})
 
 		socket.on('disconnect', (socket:any) => {
 			verbosity(`disconected from id => ${socket.id}`, { color: { 0: "magenta" } })
@@ -60,19 +85,28 @@ function __init() {
 			setTimeout(() => { socket.emit("floodTest", n) }, n)
 		})
 
+		socket.on('latency', (startTime, cb) => {
+			cb(startTime)
+		})
+
+		socket.on('error', (event) => {
+			verbosity([`New error dispatched >`, event])
+		})
+
 	})
 
 
-	__namespaces()
+	_initNamespaces()
 }
 
-function __namespaces() {
+function _initNamespaces() {
 	let activatedSockets = []
 	__legacy__objectToArray(namespaces).forEach(e => {
 		try {
 			sockets[e.key] = module.exports.auth = io.of(e.value)
-			sockets[e.key].on('connection', require(`./sockets/${e.key}`)) //set auth
+			sockets[e.key].on('connection', require(`./sockets/${e.key}`)) 
 			activatedSockets.push(e.key)
+			console.log(sockets)
 		} catch (error) {
 			verbosity([`Error activating [${e.key}] > ${error}`])
 		}
@@ -80,6 +114,11 @@ function __namespaces() {
 	verbosity([`MODULES AVAILABLE >`, activatedSockets], { color: { 0: "inverse" }, secondColor: { 0: "green" } })
 }
 
+function _initMonitor(params:type) {
+	const monitor = new koa()
+	monitor.use(serve(__dirname + "../monitor/build"))
+	nodes.global.use(mount("/", monitor))
+}
 
 
-__init()
+_createServer()
