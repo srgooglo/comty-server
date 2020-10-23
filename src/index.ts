@@ -79,12 +79,6 @@ function _createServer() {
 			verbosity(`disconected from id => ${socket.id}`, { color: { 0: "magenta" } })
 		})
 
-		socket.on('floodTest', (e:any) => {
-			const n = e + 1
-			verbosity([`floodTest (recived)=> ${e} | sending => ${n}`])
-			setTimeout(() => { socket.emit("floodTest", n) }, n)
-		})
-
 		socket.on('latency', (startTime, cb) => {
 			cb(startTime)
 		})
