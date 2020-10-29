@@ -3,24 +3,25 @@ const { verbosity, __legacy__objectToArray } = require('@ragestudio/nodecore-uti
 const fs = require('fs')
 const koa = require('koa')
 const http = require('http')
+
+const socketIo = require('socket.io')
 const socketioAuth = require('socketio-auth')
 const namespaces = require('./namespaces')
 
-const BodyParser = require("koa-bodyparser");
-const Router = require("koa-router");
-const Logger = require("koa-logger");
-const serve = require("koa-static");
-const mount = require("koa-mount");
-const cors = require('koa-cors');
-const HttpStatus = require("http-status");
+const BodyParser = require("koa-bodyparser")
+const Router = require("koa-router")
+const Logger = require("koa-logger")
+const serve = require("koa-static")
+const mount = require("koa-mount")
+const cors = require('koa-cors')
+const HttpStatus = require("http-status")
 
 let nodes = {
 	global: new koa()
 }
 
-
-const server = http.createServer(nodes.global.callback())
-const io = require('socket.io')(server)
+const serverHttp = http.createServer(nodes.global.callback())
+const io = socketIo(serverHttp)
 
 let rc = fs.readFileSync("./.rcserver.json", (err:any) => {
 	console.log(err)
@@ -56,7 +57,7 @@ function setSessionHeader(payload:any) {
 }
 
 function _createServer() {
-	server.listen(env.globalPort)
+	serverHttp.listen(env.globalPort)
 	verbosity(`Server listening with port => ${env.globalPort}`)
 
 	io.on('connection', (socket:any) => {
@@ -98,17 +99,18 @@ function _initNamespaces() {
 	__legacy__objectToArray(namespaces).forEach(e => {
 		try {
 			sockets[e.key] = module.exports.auth = io.of(e.value)
-			sockets[e.key].on('connection', require(`./sockets/${e.key}`)) 
+			sockets[e.key].on('connection', (socket) => {
+				socket._rc = rc
+				require(`./sockets/${e.key}`)(socket)
+			}) 
 			activatedSockets.push(e.key)
-			console.log(sockets)
 		} catch (error) {
 			verbosity([`Error activating [${e.key}] > ${error}`])
 		}
 	})
-	verbosity([`MODULES AVAILABLE >`, activatedSockets], { color: { 0: "inverse" }, secondColor: { 0: "green" } })
 }
 
-function _initMonitor(params:type) {
+function _initMonitor(params:any) {
 	const monitor = new koa()
 	monitor.use(serve(__dirname + "../monitor/build"))
 	nodes.global.use(mount("/", monitor))
