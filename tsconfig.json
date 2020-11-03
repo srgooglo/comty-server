@@ -1,29 +1,32 @@
 {
-    "compilerOptions": {
-      "target": "esnext",
-      "module": "commonjs",
-      "sourceMap": true,
-      "moduleResolution": "node",
-      "pretty": true,
-      "declaration": true,
-      "alwaysStrict": true,
-      // "allowSyntheticDefaultImports": true,
-      "strictNullChecks": true,
-      "esModuleInterop": true,
-      "noImplicitThis": true,
-      "noImplicitAny": true,
-      "downlevelIteration": true,
-      "lib": [
-        "dom",  // for URLSearchParams
-        "esnext"
-      ],
-      "outDir": "dist"
-    },
-    "include": [
-      "src/**/*"
+  "ts-node": {
+    "transpileOnly": true
+  },
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "pretty": true,
+    "declaration": true,
+    "alwaysStrict": true,
+    // "allowSyntheticDefaultImports": true,
+    "strictNullChecks": true,
+    "esModuleInterop": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "downlevelIteration": true,
+    "lib": [
+      "dom", // for URLSearchParams
+      "esnext"
     ],
-    "exclude": [
-      "node_modules",
-      "text"
-    ]
-  }
+    "outDir": "dist"
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "text"
+  ]
+}

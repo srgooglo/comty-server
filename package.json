@@ -10,7 +10,7 @@
   ],
   "nodemonConfig": {
     "execMap": {
-      "ts": "node --require ts-node/register/transpile-only"
+      "ts": "node --require ts-node/register"
     }
   },
   "scripts": {
@@ -23,13 +23,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@babel/core": "^7.11.6",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
-    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.10.4",
-    "@babel/plugin-proposal-optional-chaining": "^7.11.0",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.12.0",
+    "@babel/plugin-proposal-optional-chaining": "^7.12.0",
     "@babel/plugin-proposal-private-methods": "^7.10.4",
     "@babel/plugin-syntax-bigint": "^7.8.3",
     "@babel/plugin-syntax-dynamic-import": "^7.8.3",
+    "@babel/plugin-transform-runtime": "^7.12.1",
+    "@babel/runtime": "^7.12.1",
     "@ragestudio/nodecore-api-lib": "^0.2.6",
     "@ragestudio/nodecore-utils": "^0.1.18",
     "@types/express": "^4.17.8",
@@ -73,11 +74,16 @@
     "socketio-auth": "^0.1.1",
     "socketio-jwt": "^4.6.2",
     "stack-trace": "0.0.10",
+    "ts-babel-node": "^1.1.1",
     "ts-jest": "^26.4.1",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.3"
   },
   "devDependencies": {
+    "@babel/cli": "^7.12.1",
+    "@babel/core": "^7.12.0",
+    "@babel/node": "^7.12.1",
+    "@babel/preset-env": "^7.12.1",
     "eslint": "^7.10.0",
     "eslint-plugin-import": "^2.22.1",
     "monitor.io": "^0.1.0"

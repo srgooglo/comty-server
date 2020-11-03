@@ -1,7 +1,9 @@
+// @ts-ignore
 const FormData = require("formdata-node")
 const uri_compile = require('../uri_compiler')
+// @ts-ignore
 const fetch = require('node-fetch')
-
+// @ts-ignore
 module.exports = async (payload, callback) => {
   if (!payload) return false
   const { endpoint, body, userToken, options, rc } = payload
@@ -35,12 +37,15 @@ module.exports = async (payload, callback) => {
 
   if (petition.body != null) {
     try {
+      // @ts-ignore
       const bodyLength = Object.keys(petition.body).length
       if (bodyLength > 0) {
         for (let index = 0; index < bodyLength; index++) {
+          // @ts-ignore
           const ent = Object.entries(petition.body)[index]
           const key = ent[0]
           const value = ent[1]
+          // @ts-ignore
           requestBody.append(key, value)
         }
       }
@@ -50,7 +55,9 @@ module.exports = async (payload, callback) => {
   }
   fetch(url, {
     method: requestOptions.method,
+    // @ts-ignore
     body: requestBody.stream,
+    // @ts-ignore
     headers: requestBody.headers
   })
     .then(res => res.json())

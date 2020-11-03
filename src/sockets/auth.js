@@ -7,12 +7,12 @@ const base64 = require('base-64');
 
 function jwtSign(payload, callback) {
   let frame = {
-    exp: 300
+    exp: 600
   }
 
   frame = { ...frame, ...payload }
 
-  frame.exp = 300 // force set avoiding overwritting by payload
+  frame.exp = 600 // 300 5 minutes // force set avoiding overwritting by payload
 
   jwt.sign(frame, payload.server_key, (err, token) => {
     if (err) {
@@ -20,7 +20,7 @@ function jwtSign(payload, callback) {
       return false
     }
     return callback(token)
-  }, { expiresIn: 300 })
+  }, { expiresIn: 600 })
 
 }
 
@@ -142,7 +142,6 @@ module.exports = (socket) => {
             }
           }
           dataFrame = callbackResponse.res.response
-
           jwtSign({
             server_key: payload.rc.server_key,
             session_uuid: authFrame.user_id,

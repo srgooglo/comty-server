@@ -31,11 +31,11 @@ let env = {
 	globalPort: "7000",
 	addressBind: "localhost"
 }
-
+// @ts-ignore
 let sockets = [
 
 ]
-
+// @ts-ignore
 let sessionHeaders = [
 
 ]
@@ -71,6 +71,7 @@ function _createServer() {
 				pid,
 				uptime 
 			},
+			// @ts-ignore
 			sessionHeader: sessionHeaders[socket.id], 
 			registeredNamespaces: namespaces,
 			_rc: rc
@@ -79,11 +80,11 @@ function _createServer() {
 		socket.on('disconnect', (socket:any) => {
 			verbosity(`disconected from id => ${socket.id}`, { color: { 0: "magenta" } })
 		})
-
+// @ts-ignore
 		socket.on('latency', (startTime, cb) => {
 			cb(startTime)
 		})
-
+// @ts-ignore
 		socket.on('error', (event) => {
 			verbosity([`New error dispatched >`, event])
 		})
@@ -96,9 +97,11 @@ function _createServer() {
 
 function _initNamespaces() {
 	let activatedSockets = []
+	// @ts-ignore
 	__legacy__objectToArray(namespaces).forEach(e => {
 		try {
 			sockets[e.key] = module.exports.auth = io.of(e.value)
+			// @ts-ignore
 			sockets[e.key].on('connection', (socket) => {
 				socket._rc = rc
 				require(`./sockets/${e.key}`)(socket)
